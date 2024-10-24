@@ -71,11 +71,14 @@
     </form>
 
     <script>
-
+        let counter = 0;
         const socket = io({
             auth: {
                 serverOffset: 0
-            }
+            },
+            // enable retries
+            ackTimeout: 10000,
+            retries: 3,
         });
         const form = document.getElementById('form');
         const input = document.getElementById('input');
@@ -84,7 +87,11 @@
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             if (input.value) {
-                socket.emit('chat message', input.value);
+                // compute a unique offset
+                console.log("socketid:"+socket.id)
+                const clientOffset = `${socket.id}-${counter++}`;
+                console.log("clientOffset:"+clientOffset)
+                socket.emit('chat message', input.value, clientOffset);
                 //  socket.emit('hello', 123);
                 input.value = '';
             }
@@ -92,7 +99,7 @@
 
         socket.on('chat message', (msg, serverOffset) => {
             const item = document.createElement('li');
-            item.textContent = msg+"id:"+serverOffset;
+            item.textContent = msg + "id:" + serverOffset;
             messages.appendChild(item);
             window.scrollTo(0, document.body.scrollHeight);
             socket.auth.serverOffset = serverOffset;
