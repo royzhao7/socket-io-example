@@ -1,6 +1,7 @@
 {
     "image": "mcr.microsoft.com/devcontainers/typescript-node",
     "name":"socketio-ts-dev-container",
+    "runArgs": ["--name", "${localEnv:USER}_devcontainer"],
     "customizations": {
       "vscode": {
         "extensions": []
