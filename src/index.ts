@@ -5,7 +5,12 @@ import { dirname, join } from 'node:path';
 import { Server } from 'socket.io';
 import { time } from 'node:console';
 import { open } from 'sqlite';
-import  sqlite3  from 'sqlite3';
+import sqlite3 from 'sqlite3';
+import { Client } from "ssh2"
+
+
+
+const conn = new Client();
 
 // open the database file
 const db = await open({
@@ -41,6 +46,32 @@ app.get('/', (req, res) => {
 //     console.log('user disconnected');
 //   });
 // });
+let sshmsg=""
+
+
+
+conn.on('ready', () => {
+  console.log('Client :: ready');
+  conn.shell((err, stream) => {
+    if (err) throw err;
+    stream.on('close', () => {
+      console.log('Stream :: close');
+      conn.end();
+    }).on('data', (data: any) => {
+      sshmsg=data
+      io.emit('chat message', data);
+      console.log('OUTPUT: ' + sshmsg);
+    // stream.end();
+  });
+}).connect({
+  host: '192.168.1.77',
+  port: 22,
+  username: 'zhaos',
+  password: '123456'
+});
+});
+
+
 
 io.on('connection', async (socket) => {
   socket.on('chat message', async (msg, clientOffset, callback) => {
@@ -78,41 +109,41 @@ io.on('connection', async (socket) => {
   }
 
 
-  // socket.on('hello', (msg) => {
-  //     console.log('hello: ' + msg);
-  //     let randomNum = Math.random();
-  //     io.emit('hello', msg+randomNum);
-  //   });
-  // socket.onAnyOutgoing((eventName, ...args) => {
-  //     console.log(eventName); // 'hello'
-  //     console.log(args); // [ 1, '2', { 3: '4', 5: ArrayBuffer (1) [ 6 ] } ]
-  //   });
-  // socket.on('request', (arg1, arg2, callback) => {
-  //     console.log(arg1); // { foo: 'bar' }
-  //     console.log(arg2); // 'baz'
-  //     callback({
-  //       status: 'ok'
-  //     });
-  //   });
+// socket.on('hello', (msg) => {
+//     console.log('hello: ' + msg);
+//     let randomNum = Math.random();
+//     io.emit('hello', msg+randomNum);
+//   });
+// socket.onAnyOutgoing((eventName, ...args) => {
+//     console.log(eventName); // 'hello'
+//     console.log(args); // [ 1, '2', { 3: '4', 5: ArrayBuffer (1) [ 6 ] } ]
+//   });
+// socket.on('request', (arg1, arg2, callback) => {
+//     console.log(arg1); // { foo: 'bar' }
+//     console.log(arg2); // 'baz'
+//     callback({
+//       status: 'ok'
+//     });
+//   });
 
-  //   socket.timeout(5000).emit('request', { foo: 'bar' }, 'baz', (err, response) => {
-  //     if (err) {
-  //       // the client did not acknowledge the event in the given delay
-  //     } else {
-  //       console.log(response.status); // 'ok'
-  //     }
-  //   });
-  // io.on('connection', (socket) => {
-  //     socket.on('request', (arg1, arg2, callback) => {
-  //       console.log(arg1); // { foo: 'bar' }
-  //       console.log(arg2); // 'baz'
+//   socket.timeout(5000).emit('request', { foo: 'bar' }, 'baz', (err, response) => {
+//     if (err) {
+//       // the client did not acknowledge the event in the given delay
+//     } else {
+//       console.log(response.status); // 'ok'
+//     }
+//   });
+// io.on('connection', (socket) => {
+//     socket.on('request', (arg1, arg2, callback) => {
+//       console.log(arg1); // { foo: 'bar' }
+//       console.log(arg2); // 'baz'
 
-  //       callback({
+//       callback({
 
-  //         status: 'ok'
-  //       });
-  //     });
-  //   });
+//         status: 'ok'
+//       });
+//     });
+//   });
 });
 
 server.listen(3000, () => {

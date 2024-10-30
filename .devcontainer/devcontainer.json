@@ -1,11 +1,15 @@
 {
-    "image": "mcr.microsoft.com/devcontainers/typescript-node",
-    "name":"socketio-ts-dev-container",
-    "runArgs": ["--name", "${localEnv:USER}_devcontainer"],
-    "customizations": {
-      "vscode": {
-        "extensions": []
-      }
+  "image": "mcr.microsoft.com/devcontainers/typescript-node",
+  "name": "socketio-ts-dev-container",
+  "runArgs": [
+    "--name",
+    "${localEnv:USER}_devcontainer"
+  ],
+  "workspaceMount": "source=${localWorkspaceFolder},target=${localEnv:HOME}/apps/${localWorkspaceFolderBasename},type=bind",
+  "workspaceFolder": "${localEnv:HOME}/apps/${localWorkspaceFolderBasename}",
+  "customizations": {
+    "vscode": {
+      "extensions": []
     }
   }
-  
+}
